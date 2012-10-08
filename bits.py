@@ -9,5 +9,5 @@ def extractBits(bitlen, number):
     currentBits += int(bit)
     shifted = number >> totalBits - currentBits
     actual = shifted & ~(-1 << int(bit)) 
-    extracted.push_back(actual)
+    extracted.append(actual)
   return extracted
