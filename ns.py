@@ -5,7 +5,8 @@ import dns
 
 entries = {
   'py.zmbush.com' : {
-    'NS' : 'ns.zmbush.com'
+    'NS' : ['ns.zmbush.com', 'ns2.zmbush.com'],
+    'A' : '0.0.0.0'
   },
   'zabu.py.zmbush.com' : {
     'A' : '0.0.0.0'
@@ -21,7 +22,7 @@ entries = {
   }
 }
 
-serv = dns.Server(15353)
+serv = dns.Server(53)
 while True:
   p = serv.getRequest()
   print
@@ -30,8 +31,8 @@ while True:
   resp = p.makeResponse()
 
   for question in p.questions:
-    a = question.createAnswer(entries)
-    if a != None:
+    answers = question.createAnswers(entries)
+    for a in answers:
       resp.addAnswer(a)
   print
   print resp

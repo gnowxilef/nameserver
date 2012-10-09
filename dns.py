@@ -33,12 +33,19 @@ def readDNSName(string):
     string = string[1:]
   return (name_parts, string)
 
-def writeDNSName(parts):
+def writeDNSName(domain):
   r"""
   Take a list of parts and make a DNS name out of them.
   >>> writeDNSName(['static', 'zmbush', 'com'])
   '\x06static\x06zmbush\x03com\x00'
+
+  >>> writeDNSName('static.zmbush.com')
+  '\x06static\x06zmbush\x03com\x00'
   """
+  if type(domain) == str:
+    parts = domain.split('.')
+  else:
+    parts = domain
   retval = ""
   for part in parts:
     retval += struct.pack('!B', len(part))
@@ -71,14 +78,14 @@ class Question:
 
     return m[4:]
 
-  def createAnswer(self, data):
+  def createAnswers(self, data):
     r"""
     Create an Answer from the Question
     
     >>> q = Question()
     >>> q.readFrom('\x03www\x00\x00\x01\x00\x01')
     ''
-    >>> r = q.createAnswer({'www':{'A':'255.0.0.1'}})
+    >>> r = q.createAnswers({'www':{'A':'255.0.0.1'}})
     >>> r.RType
     1
     >>> r.RData
@@ -90,26 +97,33 @@ class Question:
     >>> r.TTL
     180
     """
-    r = Resource()
-    if '.'.join(self.name) in data:
-      records = data['.'.join(self.name)]
+    
+    answers = []
+    nameStr = '.'.join(self.name)
+    if nameStr in data:
+      records = data[nameStr]
       if dns_records[self.QType] in records:
-        data = records[dns_records[self.QType]]
-        r.name = self.name
-        r.RType = self.QType
         t = dns_records[self.QType]
-        if t == 'A':
-          octets = [int(n) for n in data.split('.')]
-          r.RDLength = len(octets)
-          r.RData = ''
-          for octet in octets:
-            r.RData += struct.pack('!B', octet)
-        elif t == 'NS':
-          r.RDLength = len(data)
-          r.RData = data
-        r.TTL = 180
-        return r
-    return
+
+        record = records[dns_records[self.QType]]
+        if type(record) == str:
+          record = [record]
+        for data in record:
+          r = Resource()
+          r.name = self.name
+          r.RType = self.QType
+          if t == 'A':
+            octets = [int(n) for n in data.split('.')]
+            r.RDLength = len(octets)
+            r.RData = ''
+            for octet in octets:
+              r.RData += struct.pack('!B', octet)
+          elif t == 'NS':
+            r.RData = writeDNSName(data)
+            r.RDLength = len(r.RData)
+          r.TTL = 180
+          answers.append(r)
+    return answers
  
   def pack(self):
     r"""
@@ -272,11 +286,9 @@ class Packet:
     retval = self.copy()
 
     retval.QR = 1
-    retval.AA = 0
+    retval.AA = 1
     retval.RA = 0
     retval.RCode = 0
-    retval.questions = []
-    retval.QDCount = 0
 
     retval.answers = []
     retval.ANCount = 0
