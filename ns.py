@@ -3,24 +3,7 @@ import struct
 import bits
 import dns
 
-entries = {
-  'py.zmbush.com' : {
-    'NS' : ['ns.zmbush.com', 'ns2.zmbush.com'],
-    'A' : '0.0.0.0'
-  },
-  'zabu.py.zmbush.com' : {
-    'A' : '0.0.0.0'
-  },
-  'test.py.zmbush.com' : {
-    'A' : '127.0.0.1'
-  },
-  'test2.py.zmbush.com' : {
-    'A' : '255.255.255.255'
-  },
-  'here.py.zmbush.com' : {
-    'A' : '136.152.15.33'
-  }
-}
+entries = dns.loadNSFile('ns.ns')
 
 serv = dns.Server(53)
 while True:

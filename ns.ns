@@ -1,0 +1,9 @@
+; Base records
+py.zmbush.com.         3600       IN      A       0.0.0.0
+py.zmbush.com.         3600       IN      A       127.0.0.1
+py.zmbush.com.         3600       IN      NS      ns.zmbush.com.
+py.zmbush.com.         3600       IN      NS      ns2.zmbush.com.
+
+; Sub Domains
+zabu.py.zmbush.com.    3600       IN      A       0.0.0.0
+real.py.zmbush.com.    180        IN      CNAME   zmbush.com.

@@ -14,6 +14,20 @@ dns_records = [ '',
                 'TALINK', 'CDS'
               ]
 
+def loadNSFile(fname):
+  entries = {}
+  for line in file(fname):
+    if line.startswith(';'): continue
+    parts = line.split()
+    if len(parts) >= 5:
+      name, TTL, Class, Type, Data = parts
+      if name not in entries:
+        entries[name] = {}
+      if Type not in entries[name]:
+        entries[name][Type] = []
+      entries[name][Type].append([TTL, Data])
+  return entries
+
 def readDNSName(string):
   r"""
   Reads a name entry in DNS format
@@ -99,30 +113,35 @@ class Question:
     """
     
     answers = []
-    nameStr = '.'.join(self.name)
+    nameStr = '.'.join(self.name) + '.'
     if nameStr in data:
       records = data[nameStr]
       if dns_records[self.QType] in records:
         t = dns_records[self.QType]
-
         record = records[dns_records[self.QType]]
-        if type(record) == str:
-          record = [record]
-        for data in record:
-          r = Resource()
-          r.name = self.name
-          r.RType = self.QType
-          if t == 'A':
-            octets = [int(n) for n in data.split('.')]
-            r.RDLength = len(octets)
-            r.RData = ''
-            for octet in octets:
-              r.RData += struct.pack('!B', octet)
-          elif t == 'NS':
-            r.RData = writeDNSName(data)
-            r.RDLength = len(r.RData)
-          r.TTL = 180
-          answers.append(r)
+      elif dns_records[self.QType] == 'A' and 'CNAME' in records:
+        t = 'CNAME'
+        record = records['CNAME']
+      else:
+        return answers
+      if type(record) == str:
+        record = [record]
+      for ttl,data in record:
+        r = Resource()
+        r.name = self.name
+        r.RType = self.QType
+        r.DisplayData = data
+        if t == 'A':
+          octets = [int(n) for n in data.split('.')]
+          r.RDLength = len(octets)
+          r.RData = ''
+          for octet in octets:
+            r.RData += struct.pack('!B', octet)
+        elif t == 'NS' or t == 'CNAME':
+          r.RData = writeDNSName(data)
+          r.RDLength = len(r.RData)
+        r.TTL = int(ttl)
+        answers.append(r)
     return answers
  
   def pack(self):
@@ -144,7 +163,6 @@ class Question:
     retval = ""
     retval += '.'.join(self.name)
     retval += '\t' + dns_records[self.QType]
-    retval += '\n' + repr(self.pack())
     return retval
   
 
@@ -178,10 +196,15 @@ class Resource:
 
   def __str__(self):
     retval = ""
-    retval += '.'.join(self.name)
+    retval += '.'.join(self.name) + '.'
     retval += '\t' + dns_records[self.RType]
-    retval += '\t' + self.RData
-    retval += '\n' + repr(self.pack())
+    t = dns_records[self.RType]
+    if t == 'A':
+      a,b,c,d = struct.unpack_from('!B B B B', self.RData)
+      retval += '\t%d.%d.%d.%d' % (a,b,c,d)
+    elif t == 'NS' or t == 'CNAME':
+      parts = readDNSName(self.RData)[0]
+      retval += '.'.join(parts) + '.'
     return retval
 
 class Packet:
@@ -336,7 +359,6 @@ class Server:
     return Packet(message, source)
 
   def sendResponse(self, response):
-    print "Sending: " + repr(response.pack())
     self.s.sendto(response.pack(), response.source)
 
 if __name__ == "__main__":
