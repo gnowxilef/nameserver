@@ -16,16 +16,36 @@ dns_records = [ '',
 
 def loadNSFile(fname):
   entries = {}
-  for line in file(fname):
-    if line.startswith(';'): continue
+
+  f = file(fname)
+  line = f.readline()
+  while line != '':
+    if line.startswith(';'): 
+      line = f.readline()
+      continue
     parts = line.split()
-    if len(parts) >= 5:
-      name, TTL, Class, Type, Data = parts
-      if name not in entries:
-        entries[name] = {}
-      if Type not in entries[name]:
-        entries[name][Type] = []
-      entries[name][Type].append([TTL, Data])
+    if len(parts) > 2:
+      if parts[2] == 'SOA':
+        name, Class, Type, Start, Manager, Paren = parts
+        serial = int(f.readline())
+        refresh = int(f.readline())
+        retry = int(f.readline())
+        expire = int(f.readline())
+        minimum = int(f.readline().split()[0])
+        if name not in entries:
+          entries[name] = {}
+        if Type not in entries[name]:
+          entries[name][Type] = []
+        entries[name][Type].append([Start, Manager, serial, refresh, retry,
+                                    expire, minimum])
+      elif len(parts) == 4:
+        name, TTL, Type, Data = parts
+        if name not in entries:
+          entries[name] = {}
+        if Type not in entries[name]:
+          entries[name][Type] = []
+        entries[name][Type].append([TTL, Data])
+    line = f.readline()
   return entries
 
 def readDNSName(string):
@@ -55,6 +75,9 @@ def writeDNSName(domain):
 
   >>> writeDNSName('static.zmbush.com')
   '\x06static\x06zmbush\x03com\x00'
+
+  >>> writeDNSName('static.zmbush.com.')
+  '\x06static\x06zmbush\x03com\x00'
   """
   if type(domain) == str:
     parts = domain.split('.')
@@ -62,8 +85,9 @@ def writeDNSName(domain):
     parts = domain
   retval = ""
   for part in parts:
-    retval += struct.pack('!B', len(part))
-    retval += part
+    if len(part) > 0:
+      retval += struct.pack('!B', len(part))
+      retval += part
   retval += struct.pack('!B', 0)
   return retval
 
@@ -99,7 +123,10 @@ class Question:
     >>> q = Question()
     >>> q.readFrom('\x03www\x00\x00\x01\x00\x01')
     ''
-    >>> r = q.createAnswers({'www':{'A':'255.0.0.1'}})
+    >>> r = q.createAnswers({'www.':{'A':[[180,'255.0.0.1']]}})
+    >>> len(r)
+    1
+    >>> r = r[0]
     >>> r.RType
     1
     >>> r.RData
@@ -126,21 +153,32 @@ class Question:
         return answers
       if type(record) == str:
         record = [record]
-      for ttl,data in record:
+      for row in record:
         r = Resource()
         r.name = self.name
-        r.RType = self.QType
-        r.DisplayData = data
-        if t == 'A':
-          octets = [int(n) for n in data.split('.')]
-          r.RDLength = len(octets)
-          r.RData = ''
-          for octet in octets:
-            r.RData += struct.pack('!B', octet)
-        elif t == 'NS' or t == 'CNAME':
-          r.RData = writeDNSName(data)
+        r.RType = dns_records.index(t)
+        if t == 'SOA':
+          r.RData  = writeDNSName(row[0])
+          r.RData += writeDNSName(row[1])
+          r.RData += struct.pack('!I', row[2])
+          r.RData += struct.pack('!I', row[3])
+          r.RData += struct.pack('!I', row[4])
+          r.RData += struct.pack('!I', row[5])
+          r.RData += struct.pack('!I', row[6])
           r.RDLength = len(r.RData)
-        r.TTL = int(ttl)
+        else:
+          data = row[1]
+          r.DisplayData = data
+          if t == 'A':
+            octets = [int(n) for n in data.split('.')]
+            r.RDLength = len(octets)
+            r.RData = ''
+            for octet in octets:
+              r.RData += struct.pack('!B', octet)
+          elif t == 'NS' or t == 'CNAME':
+            r.RData = writeDNSName(data)
+            r.RDLength = len(r.RData)
+          r.TTL = int(row[0])
         answers.append(r)
     return answers
  
@@ -197,6 +235,7 @@ class Resource:
   def __str__(self):
     retval = ""
     retval += '.'.join(self.name) + '.'
+    retval += '\t' + str(self.TTL) + "\tIN"
     retval += '\t' + dns_records[self.RType]
     t = dns_records[self.RType]
     if t == 'A':
@@ -204,7 +243,7 @@ class Resource:
       retval += '\t%d.%d.%d.%d' % (a,b,c,d)
     elif t == 'NS' or t == 'CNAME':
       parts = readDNSName(self.RData)[0]
-      retval += '.'.join(parts) + '.'
+      retval += '\t' + '.'.join(parts) + '.'
     return retval
 
 class Packet:
