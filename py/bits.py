@@ -13,6 +13,7 @@ Functions to extract and put data into integers. Finer grained than struct
 >>> packBits('1 1 1 1 1 1 4 5 1 6 1', *extractBits('1 1 1 1 1 1 4 5 1 6 1', 1492))
 1492
 """
+
 def extractBits(bitlen, number):
   """
   Extract Bits from a number. Like struct, but smaller.
@@ -47,6 +48,9 @@ def packBits(bitlen, *numbers):
   >>> packBits('4 4 4', 10, 3, 12)
   2620
   """
+  if len(bitlen.split()) != len(numbers):
+    raise Exception("len(numbers) must equal len(bitlen.split())")
+
   number = 0
   number |= numbers[0]
   i = 1
