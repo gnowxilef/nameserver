@@ -3,7 +3,7 @@ import socket
 import struct
 import bits
 import sys
-from 2to3 import b
+from six import b
 
 dns_records = [ '',
                 'A', 'NS', 'MD', 'MF', 'CNAME', 'SOA', 'MB', 'MG', 'MR', 'NULL', 

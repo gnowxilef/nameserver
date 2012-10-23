@@ -1,7 +1,7 @@
 import pytest
 import sys
 from dns import *
-from 2to3 import b
+from six import b
 
 class TestReadDnsName:
   def test_no_extra(self):
