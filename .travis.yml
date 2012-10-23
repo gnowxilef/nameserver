@@ -5,6 +5,4 @@ python:
   - "3.2"
 
 script:
-  - python bits.py
-  - python dns.py
-  - py.test
+  - python bits.py && python dns.py && py.test
