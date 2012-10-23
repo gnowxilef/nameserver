@@ -49,13 +49,8 @@ def loadNSFile(fname):
   return entries
 
 def readDNSName(string):
-  r"""
+  """
   Reads a name entry in DNS format
-  >>> readDNSName('\x03www\x06zmbush\x03com\x00')
-  (['www', 'zmbush', 'com'], '')
-  
-  >>> readDNSName('\x06static\x06zmbush\x03com\x00remain')
-  (['static', 'zmbush', 'com'], 'remain')
   """
   chars = struct.unpack_from('!B', string)[0]
   string = string[1:]
@@ -68,16 +63,8 @@ def readDNSName(string):
   return (name_parts, string)
 
 def writeDNSName(domain):
-  r"""
+  """
   Take a list of parts and make a DNS name out of them.
-  >>> writeDNSName(['static', 'zmbush', 'com'])
-  '\x06static\x06zmbush\x03com\x00'
-
-  >>> writeDNSName('static.zmbush.com')
-  '\x06static\x06zmbush\x03com\x00'
-
-  >>> writeDNSName('static.zmbush.com.')
-  '\x06static\x06zmbush\x03com\x00'
   """
   if type(domain) == str:
     parts = domain.split('.')
@@ -98,17 +85,8 @@ class Question:
     self.QClass = 1
 
   def readFrom(self, m):
-    r"""
+    """
     Reads data in from a file
-    >>> q = Question()
-    >>> q.readFrom('\x03www\x06zmbush\x03com\x00\x00\x01\x00\x01extra')
-    'extra'
-    >>> q.name
-    ['www', 'zmbush', 'com']
-    >>> q.QType
-    1
-    >>> q.QClass
-    1
     """
     self.name, m = readDNSName(m)
 
@@ -117,26 +95,8 @@ class Question:
     return m[4:]
 
   def createAnswers(self, data):
-    r"""
+    """
     Create an Answer from the Question
-    
-    >>> q = Question()
-    >>> q.readFrom('\x03www\x00\x00\x01\x00\x01')
-    ''
-    >>> r = q.createAnswers({'www.':{'A':[[180,'255.0.0.1']]}})
-    >>> len(r)
-    1
-    >>> r = r[0]
-    >>> r.RType
-    1
-    >>> r.RData
-    '\xff\x00\x00\x01'
-    >>> r.RDLength
-    4
-    >>> r.name
-    ['www']
-    >>> r.TTL
-    180
     """
     
     answers = []
@@ -183,15 +143,8 @@ class Question:
     return answers
  
   def pack(self):
-    r"""
+    """
     Packs the data from the Question into the response
-
-    >>> q = Question()
-    >>> rawq = '\x03www\x00\x00\x01\x00\x01'
-    >>> q.readFrom(rawq + 'extra')
-    'extra'
-    >>> q.pack() == rawq
-    True
     """
     retval = writeDNSName(self.name)
     retval += struct.pack('!H H', self.QType, self.QClass)
