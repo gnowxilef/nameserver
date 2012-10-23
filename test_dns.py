@@ -67,7 +67,7 @@ class TestQuestion:
     assert answer.RType == 1
     assert answer.RData == b('\xff\x00\x00\x01')
     assert answer.RDLength == 4
-    assert answer.name == ['www']
+    assert answer.name == [b('www')]
     assert answer.TTL == 180
 
   def test_pack(self):
