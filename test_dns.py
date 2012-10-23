@@ -77,3 +77,22 @@ class TestQuestion:
     assert q.readFrom(rawq + b('extra')) == b('extra')
     assert q.pack() == rawq
 
+class TestResource:
+  def test_read_from(self):
+    r = Resource()
+
+    data = writeDNSName(['www'])
+    data += b('\x00\x01') # RType
+    data += b('\x00\x01') # RClass
+    data += b('\x00\x00\x00\x10') # TTL
+    data += b('\x00\x04') # RDLength
+    data += b('\xff\x00\x00\x01') # RData
+    extra = r.readFrom(data + b('extra'))
+    assert extra == 'extra'
+    assert r.name == ['www']
+    assert r.RType == 1
+    assert r.RClass == 1
+    assert r.TTL == 16
+    assert r.RDLength == 4
+    assert r.RData == b('\xff\x00\x00\x01')
+
