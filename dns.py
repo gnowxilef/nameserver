@@ -52,13 +52,13 @@ def readDNSName(string):
   """
   Reads a name entry in DNS format
   """
-  chars = struct.unpack_from('!B', string)[0]
+  chars = struct.unpack_from('!B', string.decode('UTF-8'))[0]
   string = string[1:]
   name_parts = []
   while chars > 0:
     name_parts.append(string[:chars])
     string = string[chars:]
-    chars = struct.unpack_from('!B',string)[0]
+    chars = struct.unpack_from('!B',string.decode('UTF-8'))[0]
     string = string[1:]
   return (name_parts, string)
 
