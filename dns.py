@@ -2,6 +2,7 @@ import struct
 import socket
 import struct
 import bits
+import sys
 
 dns_records = [ '',
                 'A', 'NS', 'MD', 'MF', 'CNAME', 'SOA', 'MB', 'MG', 'MR', 'NULL', 
@@ -13,6 +14,12 @@ dns_records = [ '',
                 'NSEC3', 'NSEC3PARAM', 'TLSA', '', '', 'HIP', 'NINFO', 'RKEY', 
                 'TALINK', 'CDS'
               ]
+
+def b(string):
+  if sys.version_info[0] == 3:
+    return string.encode('latin-1')
+  else:
+    return string
 
 def loadNSFile(fname):
   entries = {}
@@ -52,13 +59,13 @@ def readDNSName(string):
   """
   Reads a name entry in DNS format
   """
-  chars = struct.unpack_from('!B', string.decode('UTF-8'))[0]
+  chars = struct.unpack_from('!B', string)[0]
   string = string[1:]
   name_parts = []
   while chars > 0:
     name_parts.append(string[:chars])
     string = string[chars:]
-    chars = struct.unpack_from('!B',string.decode('UTF-8'))[0]
+    chars = struct.unpack_from('!B',string)[0]
     string = string[1:]
   return (name_parts, string)
 
@@ -70,11 +77,11 @@ def writeDNSName(domain):
     parts = domain.split('.')
   else:
     parts = domain
-  retval = ""
+  retval = b('')
   for part in parts:
     if len(part) > 0:
       retval += struct.pack('!B', len(part))
-      retval += part
+      retval += b(part)
   retval += struct.pack('!B', 0)
   return retval
 
