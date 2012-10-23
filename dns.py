@@ -65,7 +65,7 @@ def readDNSName(string):
   while chars > 0:
     name_parts.append(string[:chars])
     string = string[chars:]
-    chars = struct.unpack_from('!B',string)[0]
+    chars = struct.unpack_from('!B',b(string))[0]
     string = string[1:]
   return (name_parts, string)
 
@@ -97,7 +97,7 @@ class Question:
     """
     self.name, m = readDNSName(m)
 
-    self.QType, self.QClass = struct.unpack_from('!H H', m)
+    self.QType, self.QClass = struct.unpack_from('!H H', b(m))
 
     return m[4:]
 
@@ -177,7 +177,7 @@ class Resource:
     self.name, m = readDNSName(m)
 
     self.RType, self.RClass, self.TTL, self.RDLength                           \
-                = struct.unpack_from('!H H I H', m)
+                = struct.unpack_from('!H H I H', b(m))
 
     m = m[10:]
 
