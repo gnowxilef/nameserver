@@ -59,7 +59,7 @@ def readDNSName(string):
   """
   Reads a name entry in DNS format
   """
-  chars = struct.unpack_from('!B', string)[0]
+  chars = struct.unpack_from('!B', b(string))[0]
   string = string[1:]
   name_parts = []
   while chars > 0:
