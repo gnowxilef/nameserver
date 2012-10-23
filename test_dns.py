@@ -1,12 +1,7 @@
 import pytest
 import sys
 from dns import *
-
-def b(s):
-  if sys.version_info[0] == 3:
-    return s.encode('latin-1')
-  else:
-    return s
+from 2to3 import b
 
 class TestReadDnsName:
   def test_no_extra(self):

@@ -3,6 +3,7 @@ import socket
 import struct
 import bits
 import sys
+from 2to3 import b
 
 dns_records = [ '',
                 'A', 'NS', 'MD', 'MF', 'CNAME', 'SOA', 'MB', 'MG', 'MR', 'NULL', 
@@ -14,15 +15,6 @@ dns_records = [ '',
                 'NSEC3', 'NSEC3PARAM', 'TLSA', '', '', 'HIP', 'NINFO', 'RKEY', 
                 'TALINK', 'CDS'
               ]
-
-def b(string):
-  if sys.version_info[0] == 3:
-    if type(string) == byte:
-      return string
-    else:
-      return string.encode('latin-1')
-  else:
-    return string
 
 def loadNSFile(fname):
   entries = {}
