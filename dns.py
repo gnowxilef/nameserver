@@ -17,7 +17,10 @@ dns_records = [ '',
 
 def b(string):
   if sys.version_info[0] == 3:
-    return string.encode('latin-1')
+    if type(string) == byte:
+      return string
+    else:
+      return string.encode('latin-1')
   else:
     return string
 
