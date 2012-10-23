@@ -1,5 +1,12 @@
 import pytest
+import sys
 from dns import *
+
+def b(s):
+  if sys.version_info[0] == 3:
+    return s.encode('latin-1')
+  else:
+    return s
 
 class TestReadDnsName:
   def test_no_extra(self):
@@ -15,15 +22,15 @@ class TestReadDnsName:
 class TestWriteDnsName:
   def test_list(self):
     name = writeDNSName(['static', 'zmbush', 'com'])
-    assert name == '\x06static\x06zmbush\x03com\x00'
+    assert name == b('\x06static\x06zmbush\x03com\x00')
 
   def test_string(self):
     name = writeDNSName('static.zmbush.com')
-    assert name == '\x06static\x06zmbush\x03com\x00'
+    assert name == b('\x06static\x06zmbush\x03com\x00')
 
   def test_string_with_dot(self):
     name = writeDNSName('static.zmbush.com.')
-    assert name == '\x06static\x06zmbush\x03com\x00'
+    assert name == b('\x06static\x06zmbush\x03com\x00')
 
 class TestQuestion:
   def testReadFrom(self):
@@ -42,7 +49,7 @@ class TestQuestion:
     assert len(answers) == 1
     answer = answers[0]
     assert answer.RType == 1
-    assert answer.RData == '\xff\x00\x00\x01'
+    assert answer.RData == b('\xff\x00\x00\x01')
     assert answer.RDLength == 4
     assert answer.name == ['www']
     assert answer.TTL == 180
