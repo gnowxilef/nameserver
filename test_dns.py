@@ -67,7 +67,7 @@ class TestQuestion:
     assert answer.RType == 1
     assert answer.RData == b('\xff\x00\x00\x01')
     assert answer.RDLength == 4
-    assert answer.name == [b('www')]
+    assert answer.name == ['www']
     assert answer.TTL == 180
 
   def test_pack(self):
@@ -88,7 +88,7 @@ class TestResource:
     data += b('\xff\x00\x00\x01') # RData
     extra = r.readFrom(data + b('extra'))
     assert extra == b('extra')
-    assert r.name == ['www']
+    assert r.name == [b('www')]
     assert r.RType == 1
     assert r.RClass == 1
     assert r.TTL == 16
