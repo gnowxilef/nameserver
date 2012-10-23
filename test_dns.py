@@ -57,5 +57,5 @@ class TestQuestion:
   def test_pack(self):
     q = Question()
     rawq = b('\x03www\x00\x00\x01\x00\x01')
-    assert q.readFrom(rawq + 'extra') == 'extra'
+    assert q.readFrom(rawq + b('extra')) == b('extra')
     assert q.pack() == rawq
