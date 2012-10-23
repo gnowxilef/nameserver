@@ -24,7 +24,7 @@ def b(string):
 def loadNSFile(fname):
   entries = {}
 
-  f = file(fname)
+  f = open(fname)
   line = f.readline()
   while line != '':
     if line.startswith(';'): 
@@ -139,7 +139,7 @@ class Question:
           if t == 'A':
             octets = [int(n) for n in data.split('.')]
             r.RDLength = len(octets)
-            r.RData = ''
+            r.RData = b('')
             for octet in octets:
               r.RData += struct.pack('!B', octet)
           elif t == 'NS' or t == 'CNAME':
