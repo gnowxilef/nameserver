@@ -1,7 +1,29 @@
 import pytest
 import sys
+import os
 from dns import *
 from six import b
+
+def test_load_ns_file():
+  f = open('test.ns', 'w')
+  f.write('py.zmbush.com. IN SOA ns.zmbush.com. zach.zmbush.com. (\n')
+  f.write('2012101100\n')
+  f.write('1800\n')
+  f.write('300\n')
+  f.write('604800\n')
+  f.write('800 )\n')
+  f.write('py.zmbush.com. 3600 A 0.0.0.0')
+  f.close()
+
+  dnsEntries = loadNSFile('test.ns')
+  assert dnsEntries['py.zmbush.com.']['A'][0] == [3600, '0.0.0.0']
+  assert dnsEntries['py.zmbush.com.']['SOA'][0] == ['ns.zmbush.com.',
+                                                  'zach.zmbush.com.',
+                                                  2012101100, 1800, 300, 
+                                                  604800, 800]
+
+  os.remove('test.ns')
+
 
 class TestReadDnsName:
   def test_no_extra(self):
@@ -54,3 +76,4 @@ class TestQuestion:
     rawq = b('\x03www\x00\x00\x01\x00\x01')
     assert q.readFrom(rawq + b('extra')) == b('extra')
     assert q.pack() == rawq
+

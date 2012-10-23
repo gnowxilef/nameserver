@@ -46,7 +46,7 @@ def loadNSFile(fname):
           entries[name] = {}
         if Type not in entries[name]:
           entries[name][Type] = []
-        entries[name][Type].append([TTL, Data])
+        entries[name][Type].append([int(TTL), Data])
     line = f.readline()
   return entries
 
