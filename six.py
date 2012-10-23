@@ -7,6 +7,6 @@ def b(s):
     if type(s) == bytes:
       return s
     else:
-      return string.encode('latin-1')
+      return s.encode('latin-1')
   else:
-    return string
+    return s
