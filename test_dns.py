@@ -1,5 +1,4 @@
 import pytest
-import sys
 import os
 from dns import *
 from six import b
@@ -88,7 +87,7 @@ class TestResource:
     data += b('\x00\x04') # RDLength
     data += b('\xff\x00\x00\x01') # RData
     extra = r.readFrom(data + b('extra'))
-    assert extra == 'extra'
+    assert extra == b('extra')
     assert r.name == ['www']
     assert r.RType == 1
     assert r.RClass == 1

@@ -30,11 +30,9 @@ class TestPackBits:
     assert packBits('4 4 4', 10, 3, 12) == 2620
 
   def test_too_few(self):
-    with pytest.raises(Exception):
-      packBits('4 4 4', 10, 3)
+    pytest.raises(Exception, packBits, ['4 4 4', 10, 3])
 
   def test_too_many(self):
-    with pytest.raises(Exception):
-      packBits('4 4 4', 10, 3, 10, 10)
+    pytest.raises(Exception, packBits, ['4 4 4', 10, 3, 10, 10])
 
 
