@@ -58,7 +58,7 @@ def readDNSName(string):
   string = string[1:]
   name_parts = []
   while chars > 0:
-    name_parts.append(string[:chars])
+    name_parts.append(str(string[:chars]))
     string = string[chars:]
     chars = struct.unpack_from('!B',b(string))[0]
     string = string[1:]
