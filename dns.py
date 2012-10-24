@@ -169,6 +169,9 @@ class Resource:
     self.RData = ""
 
   def readFrom(self, m):
+    """
+    Reads the data for the Resource from a string
+    """
     self.name, m = readDNSName(m)
 
     self.RType, self.RClass, self.TTL, self.RDLength                           \
@@ -181,6 +184,9 @@ class Resource:
     return m[self.RDLength:]
 
   def pack(self):
+    """
+    Packs the data for the Resource into the response
+    """
     retval = writeDNSName(self.name)
     retval += struct.pack('!H H I H', self.RType, self.RClass, self.TTL,
                           self.RDLength)
@@ -375,8 +381,3 @@ class Server:
 
   def sendResponse(self, response):
     self.s.sendto(response.pack(), response.source)
-
-if __name__ == "__main__":
-  import doctest
-  import sys
-  sys.exit(doctest.testmod()[0])
