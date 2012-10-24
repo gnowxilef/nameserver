@@ -79,17 +79,14 @@ class TestQuestion:
     assert q.readFrom(rawq + b('extra')) == b('extra')
     assert q.pack() == rawq
 
+data = writeDNSName(['www'])
+data += b('\x00\x01') # RType
+data += b('\x00\x01') # RClass
+data += b('\x00\x00\x00\x10') # TTL
+data += b('\x00\x04') # RDLength
+data += b('\xff\x00\x00\x01') # RData
 class TestResource:
-  def pytest_funcarg__data(self):
-    data = writeDNSName(['www'])
-    data += b('\x00\x01') # RType
-    data += b('\x00\x01') # RClass
-    data += b('\x00\x00\x00\x10') # TTL
-    data += b('\x00\x04') # RDLength
-    data += b('\xff\x00\x00\x01') # RData
-    return data
-
-  def test_read_from(self, data):
+  def test_read_from(self):
     r = Resource()
     extra = r.readFrom(data + b('extra'))
     assert extra == b('extra')
@@ -100,25 +97,22 @@ class TestResource:
     assert r.RDLength == 4
     assert r.RData == b('\xff\x00\x00\x01')
 
-  def test_pack(self, data):
+  def test_pack(self):
     r = Resource()
     r.readFrom(data)
     assert r.pack() == data
 
+data = b('\x00\x01') # ID
+data += b('\x00\x00') # flags
+data += b('\x00\x01') # QDCount
+data += b('\x00\x00') # ANCount
+data += b('\x00\x00') # NSCount
+data += b('\x00\x00') # ARCount
+data += writeDNSName('www.zmbush.com.')
+data += b('\x00\x01') # RType
+data += b('\x00\x01') # RClass
 class TestPacket:
-  def pytest_funcarg__data(self):
-    data = b('\x00\x01') # ID
-    data += b('\x00\x00') # flags
-    data += b('\x00\x01') # QDCount
-    data += b('\x00\x00') # ANCount
-    data += b('\x00\x00') # NSCount
-    data += b('\x00\x00') # ARCount
-    data += writeDNSName('www.zmbush.com.')
-    data += b('\x00\x01') # RType
-    data += b('\x00\x01') # RClass
-    return data
-
-  def test_parse_message(self, data):
+  def test_parse_message(self):
     p = Packet()
     p.setMessage(data)
     p.setSource((0, 0))
@@ -127,7 +121,7 @@ class TestPacket:
     assert p.QDCount == 1
     assert len(p.questions) == 1
 
-  def test_pack(self, data):
+  def test_pack(self):
     p = Packet(data, (0, 0))
     assert p.pack() == data
  
