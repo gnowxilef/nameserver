@@ -65,7 +65,7 @@ class TestLoadNSFile:
     pytest.raises(Exception, loadNSFile, ['test.ns'])
     os.remove('test.ns')
   
-  def test_extra_close_Paren(self):
+  def test_extra_close_paren(self):
     f = open('test.ns', 'w')
     f.write('py.zmbush.com. 3600 A 0.0.0.0 )')
     f.close() 
@@ -215,13 +215,14 @@ class TestEverything:
     c = threading.Thread(target=client, args=(response,s.port))
     s = threading.Thread(target=server, args=(s,))
 
+    # Allow test to exit even if threads don't
     c.daemon = True
     s.daemon = True
 
     s.start()
     c.start()
 
-    c.join(10)
+    c.join(10) # Make sure test finishes.
 
     assert not c.isAlive()
     assert response == [b('\x7f\x00\x00\x01')]
