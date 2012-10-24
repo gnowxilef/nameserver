@@ -80,8 +80,7 @@ class TestQuestion:
     assert q.pack() == rawq
 
 class TestResource:
-  @pytest.fixture
-  def data(self):
+  def pytest_funcarg__data(self):
     data = writeDNSName(['www'])
     data += b('\x00\x01') # RType
     data += b('\x00\x01') # RClass
@@ -107,8 +106,7 @@ class TestResource:
     assert r.pack() == data
 
 class TestPacket:
-  @pytest.fixture
-  def data(self):
+  def pytest_funcarg__data(self):
     data = b('\x00\x01') # ID
     data += b('\x00\x00') # flags
     data += b('\x00\x01') # QDCount
