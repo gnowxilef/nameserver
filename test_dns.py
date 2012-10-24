@@ -169,6 +169,9 @@ class TestEverything:
     c = threading.Thread(target=client, args=(response,s.port))
     s = threading.Thread(target=server, args=(s,))
 
+    c.daemon = True
+    s.daemon = True
+
     s.start()
     c.start()
 
