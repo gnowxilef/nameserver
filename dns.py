@@ -53,6 +53,9 @@ def readNSEntry(f):
     line = line.replace('(', '', 1)
     line = line[::-1].replace(')', '', 1)[::-1]
 
+  if '(' in line or ')' in line:
+    raise Exception("Mismatched Parentheses: " + line)
+
   return line
 
 def loadNSFile(fname):

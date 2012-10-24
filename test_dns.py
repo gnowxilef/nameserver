@@ -64,6 +64,15 @@ class TestLoadNSFile:
 
     pytest.raises(Exception, loadNSFile, ['test.ns'])
     os.remove('test.ns')
+  
+  def test_extra_close_Paren(self):
+    f = open('test.ns', 'w')
+    f.write('py.zmbush.com. 3600 A 0.0.0.0 )')
+    f.close() 
+
+    pytest.raises(Exception, loadNSFile, ['test.ns'])
+    os.remove('test.ns')
+
 class TestReadDnsName:
   def test_no_extra(self):
     url, remain = readDNSName('\x03www\x06zmbush\x03com\x00')
