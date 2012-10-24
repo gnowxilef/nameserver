@@ -202,12 +202,29 @@ class Resource:
     return retval
 
 class Packet:
-  def __init__(self, message=None, source=None):
+  def __init__(self, message=None, source=None, ID=None):
     if message != None and source != None:
       self.message = message
       self.source = source
       self.parseMessage()
-
+    elif ID != None:
+      self.ID = ID
+      self.QR = 0
+      self.opcode = 0
+      self.AA = 0
+      self.TC = 0
+      self.RD = 0
+      self.RA = 0
+      self.zero = 0
+      self.RCode = 0
+      self.QDCount = 0
+      self.ANCount = 0
+      self.NSCount = 0
+      self.ARCount = 0
+      self.questions = []
+      self.answers = []
+      self.authority = []
+      self.additional = []
 
   def setMessage(self, m):
     self.message = m
@@ -268,6 +285,10 @@ class Packet:
     for n in range(self.ARCount):
       retval += self.additional[n].pack()
     return retval
+
+  def addQuestion(self, q):
+    self.QDCount += 1
+    self.questions.append(q)
 
   def addAnswer(self, a):
     self.ANCount += 1
@@ -344,9 +365,9 @@ class Packet:
 
 class Server:
   def __init__(self, port):
-    self.port = port
     self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    self.s.bind(('', self.port))
+    self.s.bind(('', port))
+    self.addr, self.port = self.s.getsockname()
 
   def getRequest(self):
     message, source = self.s.recvfrom(4096)
