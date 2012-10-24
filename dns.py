@@ -20,26 +20,27 @@ def loadNSFile(fname):
   entries = {}
 
   f = open(fname)
-  line = f.readline()
+  line = f.readline().strip()
   while line != '':
     if line.startswith(';'): 
-      line = f.readline()
+      line = f.readline().strip()
       continue
+    if '(' in line:
+      line = line.replace('(', '')
+      while ')' not in line:
+        line += " " + f.readline().strip() 
+      line = line.replace(')', '')
     parts = line.split()
     if len(parts) > 2:
       if parts[2] == 'SOA':
-        name, Class, Type, Start, Manager, Paren = parts
-        serial = int(f.readline())
-        refresh = int(f.readline())
-        retry = int(f.readline())
-        expire = int(f.readline())
-        minimum = int(f.readline().split()[0])
+        name, Class, Type, Start, Manager, serial, refresh, retry, expire,     \
+        minimum = parts
         if name not in entries:
           entries[name] = {}
         if Type not in entries[name]:
           entries[name][Type] = []
-        entries[name][Type].append([Start, Manager, serial, refresh, retry,
-                                    expire, minimum])
+        entries[name][Type].append([Start, Manager, int(serial), int(refresh), 
+                                    int(retry), int(expire), int(minimum)])
       elif len(parts) == 4:
         name, TTL, Type, Data = parts
         if name not in entries:
