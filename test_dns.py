@@ -94,7 +94,7 @@ class TestResource:
     r = Resource()
     extra = r.readFrom(data + b('extra'))
     assert extra == b('extra')
-    assert r.name == [b('www')]
+    assert r.name == ['www']
     assert r.RType == 1
     assert r.RClass == 1
     assert r.TTL == 16
