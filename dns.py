@@ -268,7 +268,7 @@ class Packet:
       self.additional.append(r)
 
   def pack(self):
-    retval = ""
+    retval = b("")
 
     fields = bits.packBits('1 4 1 1 1 1 3 4', self.QR, self.opcode, self.AA, 
                            self.TC, self.RD, self.RA, self.zero, self.RCode)
