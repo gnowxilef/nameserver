@@ -6,25 +6,47 @@ import os
 import threading
 import socket
 
-def test_load_ns_file():
-  f = open('test.ns', 'w')
-  f.write('py.zmbush.com. IN SOA ns.zmbush.com. zach.zmbush.com. (\n')
-  f.write('2012101100\n')
-  f.write('1800\n')
-  f.write('300\n')
-  f.write('604800\n')
-  f.write('800 )\n')
-  f.write('py.zmbush.com. 3600 A 0.0.0.0')
-  f.close()
+class TestLoadNSFile:
+  def test_load_ns_file_normal(self):
+    f = open('test.ns', 'w')
+    f.write('py.zmbush.com. IN SOA ns.zmbush.com. zach.zmbush.com. (\n')
+    f.write('2012101100\n')
+    f.write('1800\n')
+    f.write('300\n')
+    f.write('604800\n')
+    f.write('800 )\n')
+    f.write('py.zmbush.com. 3600 A 0.0.0.0')
+    f.close()
 
-  dnsEntries = loadNSFile('test.ns')
-  assert dnsEntries['py.zmbush.com.']['A'][0] == [3600, '0.0.0.0']
-  assert dnsEntries['py.zmbush.com.']['SOA'][0] == ['ns.zmbush.com.',
-                                                  'zach.zmbush.com.',
-                                                  2012101100, 1800, 300, 
-                                                  604800, 800]
+    dnsEntries = loadNSFile('test.ns')
+    assert dnsEntries['py.zmbush.com.']['A'][0] == [3600, '0.0.0.0']
+    assert dnsEntries['py.zmbush.com.']['SOA'][0] == ['ns.zmbush.com.',
+                                                    'zach.zmbush.com.',
+                                                    2012101100, 1800, 300, 
+                                                    604800, 800]
 
-  os.remove('test.ns')
+    os.remove('test.ns')
+
+  def test_load_ns_file_parens(self):
+    f = open('test.ns', 'w')
+    f.write('py.zmbush.com. IN SOA ns.zmbush.com. zach.zmbush.com. (\n')
+    f.write('2012101100\n')
+    f.write('(((1800\n')
+    f.write('300)\n')
+    f.write('604800)\n')
+    f.write('800 ))\n')
+    f.write('py.zmbush.com. ( 3600 \n')
+    f.write('A 0.0.0.0)')
+    f.close()
+
+    dnsEntries = loadNSFile('test.ns')
+    assert dnsEntries['py.zmbush.com.']['A'][0] == [3600, '0.0.0.0']
+    assert dnsEntries['py.zmbush.com.']['SOA'][0] == ['ns.zmbush.com.',
+                                                    'zach.zmbush.com.',
+                                                    2012101100, 1800, 300, 
+                                                    604800, 800]
+
+    os.remove('test.ns')
 
 
 class TestReadDnsName:

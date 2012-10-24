@@ -25,11 +25,16 @@ def loadNSFile(fname):
     if line.startswith(';'): 
       line = f.readline().strip()
       continue
-    if '(' in line:
-      line = line.replace('(', '')
-      while ')' not in line:
-        line += " " + f.readline().strip() 
-      line = line.replace(')', '')
+    parens = 0
+    while '(' in line:
+      parens += 1
+      line = line.replace('(', '', 1)
+      while parens > 0:
+        line += " " + f.readline().strip()
+        while ')' in line:
+          parens -= 1
+          line = line.replace(')', '', 1)
+    print line
     parts = line.split()
     if len(parts) > 2:
       if parts[2] == 'SOA':
