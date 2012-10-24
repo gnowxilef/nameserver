@@ -10,3 +10,12 @@ def b(s):
       return s.encode('latin-1')
   else:
     return s
+
+def s(b):
+  if PY3:
+    if type(b) == str:
+      return s
+    else:
+      return str(b, 'latin-1')
+  else:
+    return s
