@@ -3,7 +3,7 @@ import socket
 import struct
 import bits
 import sys
-from six import b
+from six import b,s
 
 dns_records = [ '',
                 'A', 'NS', 'MD', 'MF', 'CNAME', 'SOA', 'MB', 'MG', 'MR', 'NULL', 
@@ -58,7 +58,7 @@ def readDNSName(string):
   string = string[1:]
   name_parts = []
   while chars > 0:
-    name_parts.append(str(string[:chars]))
+    name_parts.append(s(string[:chars]))
     string = string[chars:]
     chars = struct.unpack_from('!B',b(string))[0]
     string = string[1:]

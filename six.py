@@ -14,8 +14,8 @@ def b(s):
 def s(b):
   if PY3:
     if type(b) == str:
-      return s
+      return b
     else:
       return str(b, 'latin-1')
   else:
-    return s
+    return b
