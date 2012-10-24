@@ -172,6 +172,7 @@ class TestEverything:
     s.start()
     c.start()
 
-    c.join()
+    c.join(10)
 
+    assert not c.isAlive()
     assert response == ['\x7f\x00\x00\x01']
