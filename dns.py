@@ -16,25 +16,56 @@ dns_records = [ '',
                 'TALINK', 'CDS'
               ]
 
+def cleanNSLine(line):
+  line = line.strip()
+  if line.startswith(';'):
+    return ''
+  else:
+    return line.split(';')[0]
+
+def readEffectiveNSLine(f):
+  while True:
+    l = f.readline()
+    if l == '':
+      return None
+
+    l = cleanNSLine(l)
+    
+    if l != '':
+      return l
+
+def readNSEntry(f):
+  line = readEffectiveNSLine(f)
+
+  if line == None:
+    return None
+
+  parens = 0
+
+  while line.count('(') != line.count(')'):
+    n = readEffectiveNSLine(f)
+    if n == None:
+      raise Exception("Mismatched Parentheses: " + line)
+
+    line += " " + n
+
+  while line.count('(') > 0 and line.index('(') < line.index(')'):
+    line = line.replace('(', '', 1)
+    line = line[::-1].replace(')', '', 1)[::-1]
+
+  return line
+
 def loadNSFile(fname):
   entries = {}
 
   f = open(fname)
-  line = f.readline().strip()
-  while line != '':
-    if line.startswith(';'): 
-      line = f.readline().strip()
-      continue
-    parens = 0
-    while '(' in line:
-      parens += 1
-      line = line.replace('(', '', 1)
-      while parens > 0:
-        line += " " + f.readline().strip()
-        while ')' in line:
-          parens -= 1
-          line = line.replace(')', '', 1)
-    parts = line.split()
+
+  while True:
+    entry = readNSEntry(f)
+    if entry == None:
+      break
+
+    parts = entry.split()
     if len(parts) > 2:
       if parts[2] == 'SOA':
         name, Class, Type, Start, Manager, serial, refresh, retry, expire,     \
@@ -52,7 +83,7 @@ def loadNSFile(fname):
         if Type not in entries[name]:
           entries[name][Type] = []
         entries[name][Type].append([int(TTL), Data])
-    line = f.readline()
+    # line = f.readline()
   return entries
 
 def readDNSName(string):

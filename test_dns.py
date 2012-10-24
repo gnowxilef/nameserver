@@ -15,7 +15,7 @@ class TestLoadNSFile:
     f.write('300\n')
     f.write('604800\n')
     f.write('800 )\n')
-    f.write('py.zmbush.com. 3600 A 0.0.0.0')
+    f.write('py.zmbush.com. 3600 A 0.0.0.0\n')
     f.close()
 
     dnsEntries = loadNSFile('test.ns')
@@ -48,7 +48,22 @@ class TestLoadNSFile:
 
     os.remove('test.ns')
 
+  def test_malformed_ns_file(self):
+    f = open('test.ns', 'w')
+    f.write('py.zmbush.com. IN SOA ns.zmbush.com. zach.zmbush.com. (\n')
+    f.write('2012101100\n')
+    f.write('(((1800\n')
+    f.write('300)\n')
+    f.write('604800)\n')
+    f.write('800 ))\n')
+    f.write('py.zmbush.com. ( 3600 \n')
+    f.write('A 0.0.0.0)')
+    f.write('py.zmbush.com. ( 3600 \n')
+    f.write('A 0.0.0.0')
+    f.close() 
 
+    pytest.raises(Exception, loadNSFile, ['test.ns'])
+    os.remove('test.ns')
 class TestReadDnsName:
   def test_no_extra(self):
     url, remain = readDNSName('\x03www\x06zmbush\x03com\x00')
