@@ -27,16 +27,16 @@ if __name__ == "__main__":
       for Type, values in data.items():
         if Type == "SOA":
           Start, Manager, serial, refresh, retry, expire, minimum = values[0]
-          print(url,"\tIN\t",Type,"\t",Start,"\t",Manager," (")
+          print(url+"\tIN\t"+Type+"\t"+Start+"\t"+Manager+" (")
           print(serial)
           print(refresh)
           print(retry)
           print(expire)
-          print(minimum, ")")
+          print(str(minimum)+")")
         for parts in values:
           if len(parts) == 2:
             ttl,name = parts
-            print(url,"\t",ttl,"\t",Type,"\t",name)
+            print(url+"\t"+str(ttl)+"\t"+Type+"\t"+name)
     sys.exit(0)
 
   serv = dns.Server(options.port)
