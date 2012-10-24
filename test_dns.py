@@ -178,4 +178,4 @@ class TestEverything:
     c.join(10)
 
     assert not c.isAlive()
-    assert response == ['\x7f\x00\x00\x01']
+    assert response == [b('\x7f\x00\x00\x01')]
