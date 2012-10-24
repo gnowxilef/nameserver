@@ -34,7 +34,6 @@ def loadNSFile(fname):
         while ')' in line:
           parens -= 1
           line = line.replace(')', '', 1)
-    print line
     parts = line.split()
     if len(parts) > 2:
       if parts[2] == 'SOA':
