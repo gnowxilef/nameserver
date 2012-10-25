@@ -1,6 +1,10 @@
 ; Start of Authority
 py.zmbush.com.         IN       SOA     ns.zmbush.com. zach.zmbush.com. (
-                                        2012101100 1800 300 604800 800 )
+                                                                    2012101100 
+                                                                    1800 
+                                                                    300 
+                                                                    604800 
+                                                                    800 )
 
 ; Base records
 py.zmbush.com.         3600       A       0.0.0.0

@@ -27,12 +27,9 @@ if __name__ == "__main__":
       for Type, values in data.items():
         if Type == "SOA":
           Start, Manager, serial, refresh, retry, expire, minimum = values[0]
-          print(url+"\tIN\t"+Type+"\t"+Start+"\t"+Manager+" (")
-          print(serial)
-          print(refresh)
-          print(retry)
-          print(expire)
-          print(str(minimum)+")")
+          print(url + "\tIN\t" + Type + "\t" + Start + "\t" + Manager + "\t" +
+                str(serial) + "\t" + str(refresh) + "\t" +  str(retry) + "\t"
+                + str(expire) + "\t" + str(minimum))
         for parts in values:
           if len(parts) == 2:
             ttl,name = parts
