@@ -146,43 +146,25 @@ class Question:
     nameStr = '.'.join(self.name) + '.'
     if nameStr in data:
       records = data[nameStr]
-      if dns_records[self.QType] in records:
-        t = dns_records[self.QType]
-        record = records[dns_records[self.QType]]
-      elif dns_records[self.QType] == 'A' and 'CNAME' in records:
-        t = 'CNAME'
-        record = records['CNAME']
+      if self.QType == 255:
+        for typeStr in records:
+          record = records[typeStr]
+          for entry in record:
+            answers.append(Resource(self.name, typeStr, entry))
       else:
-        return answers
-      if type(record) == str:
-        record = [record]
-      for row in record:
-        r = Resource()
-        r.name = self.name
-        r.RType = dns_records.index(t)
-        if t == 'SOA':
-          r.RData  = writeDNSName(row[0])
-          r.RData += writeDNSName(row[1])
-          r.RData += struct.pack('!I', row[2])
-          r.RData += struct.pack('!I', row[3])
-          r.RData += struct.pack('!I', row[4])
-          r.RData += struct.pack('!I', row[5])
-          r.RData += struct.pack('!I', row[6])
-          r.RDLength = len(r.RData)
+        if dns_records[self.QType] in records:
+          t = dns_records[self.QType]
+          record = records[dns_records[self.QType]]
+        elif dns_records[self.QType] == 'A' and 'CNAME' in records:
+          t = 'CNAME'
+          record = records['CNAME']
         else:
-          data = row[1]
-          r.DisplayData = data
-          if t == 'A':
-            octets = [int(n) for n in data.split('.')]
-            r.RDLength = len(octets)
-            r.RData = b('')
-            for octet in octets:
-              r.RData += struct.pack('!B', octet)
-          elif t == 'NS' or t == 'CNAME':
-            r.RData = writeDNSName(data)
-            r.RDLength = len(r.RData)
-          r.TTL = int(row[0])
-        answers.append(r)
+          return answers
+        if type(record) == str:
+          record = [record]
+        for row in record:
+          r = Resource(self.name, t, row)
+          answers.append(r)
     return answers
  
   def pack(self):
@@ -206,13 +188,38 @@ class Question:
   
 
 class Resource:
-  def __init__(self):
-    self.name = 0
-    self.RType = 0
-    self.RClass = 1
-    self.TTL = 0
-    self.RDLength = 0
-    self.RData = ""
+  def __init__(self, entryName = None, entryType = None, entry = None):
+    if entryName != None and entryType != None and entry != None:
+      self.name = entryName
+      self.RType = dns_records.index(entryType)
+      self.RClass = 1 # Internet
+      self.TTL = entry[0]
+      if entryType == 'SOA':
+        self.TTL = 0
+        self.RData  = writeDNSName(entry[0])
+        self.RData += writeDNSName(entry[1])
+        self.RData += struct.pack('!I', entry[2])
+        self.RData += struct.pack('!I', entry[3])
+        self.RData += struct.pack('!I', entry[4])
+        self.RData += struct.pack('!I', entry[5])
+        self.RData += struct.pack('!I', entry[6])
+        self.RDLength = len(self.RData)
+      elif entryType == 'A':
+        octets = [int(n) for n in entry[1].split('.')]
+        self.RDLength = len(octets)
+        self.RData = b('')
+        for octet in octets:
+          self.RData += struct.pack('!B', octet)
+      elif entryType in ['NS', 'CNAME']:
+        self.RData = writeDNSName(entry[1])
+        self.RDLength = len(self.RData)
+    else:
+      self.name = 0
+      self.RType = 0
+      self.RClass = 1
+      self.TTL = 0
+      self.RDLength = 0
+      self.RData = ""
 
   def readFrom(self, m):
     """
