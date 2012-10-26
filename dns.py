@@ -16,6 +16,8 @@ dns_records = [ '',
                 'TALINK', 'CDS'
               ]
 
+extra_dns_records = { 255 : '*' }
+
 def cleanNSLine(line):
   line = line.strip()
   if line.startswith(';'):
@@ -194,7 +196,12 @@ class Question:
   def __str__(self):
     retval = ""
     retval += '.'.join(self.name)
-    retval += '\t' + dns_records[self.QType]
+    if self.QType in range(len(dns_records)):
+      retval += '\t' + dns_records[self.QType]
+    elif self.QType in extra_dns_records:
+      retval += '\t' + extra_dns_records[self.QType]
+    else:
+      retval += "\t???"
     return retval
   
 
