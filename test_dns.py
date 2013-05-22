@@ -6,6 +6,7 @@ import os
 import threading
 import socket
 
+
 class TestLoadNSFile:
   def test_load_ns_file_normal(self):
     f = open('test.ns', 'w')
@@ -21,9 +22,9 @@ class TestLoadNSFile:
     dnsEntries = loadNSFile('test.ns')
     assert dnsEntries['py.zmbush.com.']['A'][0] == [3600, '0.0.0.0']
     assert dnsEntries['py.zmbush.com.']['SOA'][0] == ['ns.zmbush.com.',
-                                                    'zach.zmbush.com.',
-                                                    2012101100, 1800, 300, 
-                                                    604800, 800]
+                                                      'zach.zmbush.com.',
+                                                      2012101100, 1800, 300,
+                                                      604800, 800]
 
     os.remove('test.ns')
 
@@ -42,9 +43,9 @@ class TestLoadNSFile:
     dnsEntries = loadNSFile('test.ns')
     assert dnsEntries['py.zmbush.com.']['A'][0] == [3600, '0.0.0.0']
     assert dnsEntries['py.zmbush.com.']['SOA'][0] == ['ns.zmbush.com.',
-                                                    'zach.zmbush.com.',
-                                                    2012101100, 1800, 300, 
-                                                    604800, 800]
+                                                      'zach.zmbush.com.',
+                                                      2012101100, 1800, 300,
+                                                      604800, 800]
 
     os.remove('test.ns')
 
@@ -60,18 +61,19 @@ class TestLoadNSFile:
     f.write('A 0.0.0.0)')
     f.write('py.zmbush.com. ( 3600 \n')
     f.write('A 0.0.0.0')
-    f.close() 
+    f.close()
 
     pytest.raises(Exception, loadNSFile, ['test.ns'])
     os.remove('test.ns')
-  
+
   def test_extra_close_paren(self):
     f = open('test.ns', 'w')
     f.write('py.zmbush.com. 3600 A 0.0.0.0 )')
-    f.close() 
+    f.close()
 
     pytest.raises(Exception, loadNSFile, ['test.ns'])
     os.remove('test.ns')
+
 
 class TestReadDnsName:
   def test_no_extra(self):
@@ -83,6 +85,7 @@ class TestReadDnsName:
     url, remain = readDNSName('\x03www\x06zmbush\x03com\x00remain')
     assert url == ['www', 'zmbush', 'com']
     assert remain == 'remain'
+
 
 class TestWriteDnsName:
   def test_list(self):
@@ -97,6 +100,7 @@ class TestWriteDnsName:
     name = writeDNSName('static.zmbush.com.')
     assert name == b('\x06static\x06zmbush\x03com\x00')
 
+
 class TestQuestion:
   def test_read_from(self):
     q = Question()
@@ -106,11 +110,11 @@ class TestQuestion:
     assert q.QType == 1
     assert q.QClass == 1
 
-  def test_create_answer(self): 
+  def test_create_answer(self):
     q = Question()
     r = q.readFrom('\x03www\x00\x00\x01\x00\x01')
     assert r == ''
-    answers = q.createAnswers({'www.':{'A':[[180,'255.0.0.1']]}})
+    answers = q.createAnswers({'www.': {'A': [[180, '255.0.0.1']]}})
     assert len(answers) == 1
     answer = answers[0]
     assert answer.RType == 1
@@ -125,15 +129,16 @@ class TestQuestion:
     assert q.readFrom(rawq + b('extra')) == b('extra')
     assert q.pack() == rawq
 
+
 class TestResource:
   @pytest.fixture
   def data(self):
     data = writeDNSName(['www'])
-    data += b('\x00\x01') # RType
-    data += b('\x00\x01') # RClass
-    data += b('\x00\x00\x00\x10') # TTL
-    data += b('\x00\x04') # RDLength
-    data += b('\xff\x00\x00\x01') # RData
+    data += b('\x00\x01')           # RType
+    data += b('\x00\x01')           # RClass
+    data += b('\x00\x00\x00\x10')   # TTL
+    data += b('\x00\x04')           # RDLength
+    data += b('\xff\x00\x00\x01')   # RData
     return data
 
   def test_read_from(self, data):
@@ -152,18 +157,19 @@ class TestResource:
     r.readFrom(data)
     assert r.pack() == data
 
+
 class TestPacket:
   @pytest.fixture
   def data(self):
-    data = b('\x00\x01') # ID
-    data += b('\x00\x00') # flags
-    data += b('\x00\x01') # QDCount
-    data += b('\x00\x00') # ANCount
-    data += b('\x00\x00') # NSCount
-    data += b('\x00\x00') # ARCount
+    data = b('\x00\x01')                    # ID
+    data += b('\x00\x00')                   # flags
+    data += b('\x00\x01')                   # QDCount
+    data += b('\x00\x00')                   # ANCount
+    data += b('\x00\x00')                   # NSCount
+    data += b('\x00\x00')                   # ARCount
     data += writeDNSName('www.zmbush.com.')
-    data += b('\x00\x01') # RType
-    data += b('\x00\x01') # RClass
+    data += b('\x00\x01')                   # RType
+    data += b('\x00\x01')                   # RClass
     return data
 
   def test_parse_message(self, data):
@@ -178,7 +184,8 @@ class TestPacket:
   def test_pack(self, data):
     p = Packet(data, (0, 0))
     assert p.pack() == data
- 
+
+
 class TestEverything:
   def test_send_receive(self):
     def server(s):
@@ -186,7 +193,8 @@ class TestEverything:
       resp = req.makeResponse()
 
       for question in req.questions:
-        answers = question.createAnswers({'www.zmbush.com.':{'A':[[180,'127.0.0.1']]}})
+        answers = question.createAnswers({'www.zmbush.com.':
+                                          {'A': [[180, '127.0.0.1']]}})
         for a in answers:
           resp.addAnswer(a)
 
@@ -197,7 +205,7 @@ class TestEverything:
       sock.bind(('', 0))
       q = Question()
       q.name = ['www', 'zmbush', 'com']
-      q.QType = dns_records.index('A') 
+      q.QType = dns_records.index('A')
 
       p = Packet(ID=1000)
       p.addQuestion(q)
@@ -209,10 +217,10 @@ class TestEverything:
 
       for ans in resp.answers:
         response.append(ans.RData)
-    
+
     response = []
     s = Server(0)
-    c = threading.Thread(target=client, args=(response,s.port))
+    c = threading.Thread(target=client, args=(response, s.port))
     s = threading.Thread(target=server, args=(s,))
 
     # Allow test to exit even if threads don't
@@ -222,7 +230,7 @@ class TestEverything:
     s.start()
     c.start()
 
-    c.join(10) # Make sure test finishes.
+    c.join(10)  # Make sure test finishes.
 
     assert not c.isAlive()
     assert response == [b('\x7f\x00\x00\x01')]

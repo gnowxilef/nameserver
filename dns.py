@@ -5,18 +5,18 @@ import bits
 import sys
 from six import b,s
 
-dns_records = [ '',
-                'A', 'NS', 'MD', 'MF', 'CNAME', 'SOA', 'MB', 'MG', 'MR', 'NULL', 
-                'WKS', 'PTR', 'HINFO', 'MINFO', 'MX', 'TXT', 'RP', 'AFSDB', 
-                'X25', 'ISDN', 'RT', 'NSAP', 'NSAP-PTR', 'SIG', 'KEY', 'PX', 
-                'GPOS', 'AAAA', 'LOC', 'NXT', 'EID', 'NIMLOC', 'SRV', 'ATMA', 
-                'NAPTR', 'KX', 'CERT', 'A6', 'DNAME', 'SINK', 'OPT', 'APL', 
-                'DS', 'SSHFP', 'IPSECKEY', 'RRSIG', 'NSEC', 'DNSKEY', 'DHCID', 
-                'NSEC3', 'NSEC3PARAM', 'TLSA', '', '', 'HIP', 'NINFO', 'RKEY', 
-                'TALINK', 'CDS'
-              ]
+dns_records = ['',
+               'A', 'NS', 'MD', 'MF', 'CNAME', 'SOA', 'MB', 'MG', 'MR', 'NULL', 
+               'WKS', 'PTR', 'HINFO', 'MINFO', 'MX', 'TXT', 'RP', 'AFSDB', 
+               'X25', 'ISDN', 'RT', 'NSAP', 'NSAP-PTR', 'SIG', 'KEY', 'PX', 
+               'GPOS', 'AAAA', 'LOC', 'NXT', 'EID', 'NIMLOC', 'SRV', 'ATMA', 
+               'NAPTR', 'KX', 'CERT', 'A6', 'DNAME', 'SINK', 'OPT', 'APL', 
+               'DS', 'SSHFP', 'IPSECKEY', 'RRSIG', 'NSEC', 'DNSKEY', 'DHCID', 
+               'NSEC3', 'NSEC3PARAM', 'TLSA', '', '', 'HIP', 'NINFO', 'RKEY', 
+               'TALINK', 'CDS']
 
-extra_dns_records = { 255 : '*' }
+extra_dns_records = { 255: '*' }
+
 
 def cleanNSLine(line):
   line = line.strip()
@@ -24,6 +24,7 @@ def cleanNSLine(line):
     return ''
   else:
     return line.split(';')[0]
+
 
 def readEffectiveNSLine(f):
   while True:
@@ -35,6 +36,7 @@ def readEffectiveNSLine(f):
     
     if l != '':
       return l
+
 
 def readNSEntry(f):
   line = readEffectiveNSLine(f)
@@ -59,6 +61,7 @@ def readNSEntry(f):
     raise Exception("Mismatched Parentheses: " + line)
 
   return line
+
 
 def loadNSFile(fname):
   entries = {}
@@ -91,6 +94,7 @@ def loadNSFile(fname):
     # line = f.readline()
   return entries
 
+
 def readDNSName(string):
   """
   Reads a name entry in DNS format
@@ -104,6 +108,7 @@ def readDNSName(string):
     chars = struct.unpack_from('!B',b(string))[0]
     string = string[1:]
   return (name_parts, string)
+
 
 def writeDNSName(domain):
   """
@@ -120,6 +125,7 @@ def writeDNSName(domain):
       retval += b(part)
   retval += struct.pack('!B', 0)
   return retval
+
 
 class Question:
   def __init__(self):
@@ -260,6 +266,7 @@ class Resource:
       retval += '\t' + '.'.join(parts) + '.'
     return retval
 
+
 class Packet:
   def __init__(self, message=None, source=None, ID=None):
     if message != None and source != None:
@@ -293,14 +300,14 @@ class Packet:
 
   def parseMessage(self):
     m = self.message
-    self.ID, fields, self.QDCount, self.ANCount, self.NSCount, self.ARCount    \
+    self.ID, fields, self.QDCount, self.ANCount, self.NSCount, self.ARCount   \
       = struct.unpack_from('!H H H H H H', m)
 
     m = m[12:]
 
-    self.QR, self.opcode, self.AA, self.TC, self.RD, self.RA, self.zero,       \
-      self.RCode = bits.extractBits('1 4 1 1 1 1 3 4', fields)
-    
+    self.QR, self.opcode, self.AA, self.TC, self.RD, self.RA, self.zero,      \
+    self.RCode = bits.extractBits('1 4 1 1 1 1 3 4', fields)
+
     self.questions = []
     self.answers = []
     self.authority = []
@@ -320,7 +327,7 @@ class Packet:
       r = Resource()
       m = r.readFrom(m)
       self.authority.append(r)
-    
+
     for n in range(self.ARCount):
       r = Resource()
       m = r.readFrom(m)
@@ -329,12 +336,12 @@ class Packet:
   def pack(self):
     retval = b("")
 
-    fields = bits.packBits('1 4 1 1 1 1 3 4', self.QR, self.opcode, self.AA, 
+    fields = bits.packBits('1 4 1 1 1 1 3 4', self.QR, self.opcode, self.AA,
                            self.TC, self.RD, self.RA, self.zero, self.RCode)
-    
+
     retval += struct.pack('!H H H H H H', self.ID, fields, self.QDCount,
                           self.ANCount, self.NSCount, self.ARCount)
-    
+
     for n in range(self.QDCount):
       retval += self.questions[n].pack()
     for n in range(self.ANCount):
@@ -355,7 +362,7 @@ class Packet:
 
   def copy(self):
     retval = Packet()
-    
+
     retval.message = self.message
     retval.source = self.source
 
@@ -367,11 +374,11 @@ class Packet:
     retval.RD = self.RD
     retval.RA = self.RA
     retval.zero = self.zero
-    retval.RCode  = self.RCode
-    retval.QDCount  = self.QDCount
-    retval.ANCount  = self.ANCount
-    retval.NSCount  = self.NSCount
-    retval.ARCount  = self.ARCount
+    retval.RCode = self.RCode
+    retval.QDCount = self.QDCount
+    retval.ANCount = self.ANCount
+    retval.NSCount = self.NSCount
+    retval.ARCount = self.ARCount
     retval.questions = list(self.questions)
     retval.answers = list(self.answers)
     retval.authority = list(self.authority)
@@ -421,6 +428,7 @@ class Packet:
       for n in range(self.ARCount):
         retval += '\n\t' + str(self.additional[n])
     return retval
+
 
 class Server:
   def __init__(self, port):

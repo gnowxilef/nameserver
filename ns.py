@@ -8,8 +8,8 @@ from optparse import OptionParser
 if __name__ == "__main__":
   parser = OptionParser()
 
-  parser.add_option("-f", "--file", dest="filename", 
-                    help="File to load DNS records from [Default: %default]", 
+  parser.add_option("-f", "--file", dest="filename",
+                    help="File to load DNS records from [Default: %default]",
                     metavar="FILE", default="ns.ns", type="string")
   parser.add_option("-p", "--port", dest="port",
                     help="Specify port to listen to [Default: %default]",
@@ -28,12 +28,12 @@ if __name__ == "__main__":
         if Type == "SOA":
           Start, Manager, serial, refresh, retry, expire, minimum = values[0]
           print(url + "\tIN\t" + Type + "\t" + Start + "\t" + Manager + "\t" +
-                str(serial) + "\t" + str(refresh) + "\t" +  str(retry) + "\t"
+                str(serial) + "\t" + str(refresh) + "\t" + str(retry) + "\t"
                 + str(expire) + "\t" + str(minimum))
         for parts in values:
           if len(parts) == 2:
-            ttl,name = parts
-            print(url+"\t"+str(ttl)+"\t"+Type+"\t"+name)
+            ttl, name = parts
+            print(url + "\t" + str(ttl) + "\t" + Type + "\t" + name)
     sys.exit(0)
 
   serv = dns.Server(options.port)
